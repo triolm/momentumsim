@@ -1,3 +1,5 @@
+double globalEnergyLoss;
+
 public class PointMass {
   Point pos;
   Vector vel;
@@ -18,24 +20,36 @@ public class PointMass {
       return;
     }
 
-    checkCollision(new Point(pos.x, height), .50);
-    checkCollision(new Point(pos.x, 0), .50)    ;
-    checkCollision(new Point(width, pos.y), .50);
-    checkCollision(new Point(width, 0), .50);
-
     pos = pos.add(vel);
+    clamp();
+
+    checkCollision(new Point(pos.x, height), 3 *Math.PI/2);
+    checkCollision(new Point(pos.x, 0), Math.PI/2)    ;
+    checkCollision(new Point(width, pos.y), Math.PI);
+    checkCollision(new Point(0, pos.y), 0);
   }
-  public void collideAt(Point p, double energyLoss, angle) {
+  public void collideAt(Point p, double energyLoss, double normalAngle) {
+    //move to where they're not overlapping
     while (touchingHitbox(p)) {
       pos = pos.add(vel.normalize().scale(-1));
     }
-    vel = vel.scale(-energyLoss);
+    //calculate bounce angle
+    //source: https://stackoverflow.com/questions/573084/how-to-calculate-bounce-angle
+    Vector n = new Vector(normalAngle);
+    Vector u = n.scale(vel.dot(n) / n.dot(n));
+    Vector w = vel.add(u.scale(-1));
+    vel = w.add(u.scale(-1)).scale(energyLoss-1);
+
+    //vel = vel.scale(-energyLoss);
   }
 
   public boolean checkCollision(Point p, double energyLoss, double angle) {
     if (!touchingHitbox(p)) return false;
     collideAt(p, energyLoss, angle);
     return true;
+  }
+  public boolean checkCollision(Point p, double angle) {
+    return checkCollision(p, globalEnergyLoss, angle);
   }
 
 
@@ -78,6 +92,21 @@ public class PointMass {
 
   Point translate(Point p) {
     return new Point(p.getX(), height - p.y);
+  }
+
+  public void clamp() {
+    if ( pos.x < 0|| pos.y < 0) {
+      pos = new Point(pos.x < 0? 0:pos.x, pos.y < 0? 0:pos.y);
+    }
+    if (pos.x > width || pos.y > height ) {
+      pos = new Point(pos.x > width? width:pos.x, pos.y > height? height:pos.y);
+    }
+  }
+
+  public void removeEpsilon() {
+    if (vel.length() < .1) {
+      vel = new Vector(0, 0);
+    }
   }
 
   public void draw() {

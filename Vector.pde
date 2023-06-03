@@ -5,6 +5,12 @@ class Vector {
         this.dx = dx;
         this.dy = dy;
     }
+    
+    //length was taken...
+    public Vector(double angle){
+       this.dx = Math.sin(angle);
+       this.dy = Math.cos(angle);
+    }
 
     //getters
 
