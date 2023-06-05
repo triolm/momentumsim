@@ -10,12 +10,19 @@ void setup() {
 void draw() {
   background(230, 230, 230);
 
-  p1.draw();
   p1.applyGrav();
-  p1.step();
-  p2.draw();
   p2.applyGrav();
-  p2.step();
+  
+  p1.checkCollision(p2);
+  p2.checkCollision(p1);
+  
+  p1.step();  
+  p2.step();  
+
+    p1.draw();
+
+    p2.draw();
+
 }
 
 void keyPressed() {

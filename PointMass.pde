@@ -21,6 +21,12 @@ public class PointMass {
     }
 
     pos = pos.add(vel);
+
+    walls();
+  }
+
+
+  public void walls() {
     clamp();
 
     checkCollision(new Point(pos.x, height), 3 *Math.PI/2);
@@ -28,20 +34,27 @@ public class PointMass {
     checkCollision(new Point(width, pos.y), Math.PI);
     checkCollision(new Point(0, pos.y), 0);
   }
+
   public void collideAt(Point p, double energyLoss, double normalAngle) {
+    Vector n = new Vector(normalAngle);
+    collideAt(p, energyLoss, n);
+  }
+
+  public void collideAt(Point p, double energyLoss, Vector n) {
     //move to where they're not overlapping
     while (touchingHitbox(p)) {
+      if (vel.length() == 0) break;
       pos = pos.add(vel.normalize().scale(-1));
     }
     //calculate bounce angle
     //source: https://stackoverflow.com/questions/573084/how-to-calculate-bounce-angle
-    Vector n = new Vector(normalAngle);
     Vector u = n.scale(vel.dot(n) / n.dot(n));
     Vector w = vel.add(u.scale(-1));
     vel = w.add(u.scale(-1)).scale(energyLoss-1);
 
     //vel = vel.scale(-energyLoss);
   }
+
 
   public boolean checkCollision(Point p, double energyLoss, double angle) {
     if (!touchingHitbox(p)) return false;
@@ -52,6 +65,31 @@ public class PointMass {
     return checkCollision(p, globalEnergyLoss, angle);
   }
 
+
+  public boolean checkCollision(PointMass p) {
+    boolean touchingV =
+      //if top of other is between top and bottom of this
+      (p.pos.y + p.rad < pos.y + rad) && (p.pos.y + p.rad > pos.y - rad) ||
+      //if bottom of other is between top and bottom of this
+      (p.pos.y - p.rad < pos.y + rad) && (p.pos.y - p.rad > pos.y - rad);
+    boolean touchingH =
+      //if top of other is between top and bottom of this
+      (p.pos.x + p.rad < pos.x + rad) && (p.pos.x + p.rad > pos.x - rad) ||
+      //if bottom of other is between top and bottom of this
+      (p.pos.x - p.rad < pos.x + rad) && (p.pos.x - p.rad > pos.x - rad);
+
+    if (!touchingH & touchingV) return false;
+
+    Vector v = p.pos.subtract(pos);
+    Vector dirn;
+    if (Math.abs(v.dx) > Math.abs(v.dy)) {
+      dirn = new Vector(v.dx, 0).normalize();
+    }
+    dirn = new Vector(0, v.dy).normalize();
+
+    collideAt(pos, globalEnergyLoss, dirn);
+    return true;
+  }
 
   public boolean mouseInteraction() {
     Point mouse= translate(new Point(mouseX, mouseY));
@@ -87,7 +125,9 @@ public class PointMass {
   }
 
   public boolean touchingHitbox(Point p) {
-    return p.getDist(pos) < rad;
+    boolean touchingH = Math.abs(p.x-pos.x) < rad;
+    boolean touchingV = Math.abs(p.y-pos.y) < rad;
+    return touchingH & touchingV;
   }
 
   Point translate(Point p) {
@@ -95,16 +135,16 @@ public class PointMass {
   }
 
   public void clamp() {
-    if ( pos.x < 0|| pos.y < 0) {
-      pos = new Point(pos.x < 0? 0:pos.x, pos.y < 0? 0:pos.y);
+    if ( pos.x < 0 || pos.y < 0) {
+      pos = new Point(pos.x < 0? 1:pos.x, pos.y < 0? 1:pos.y);
     }
     if (pos.x > width || pos.y > height ) {
-      pos = new Point(pos.x > width? width:pos.x, pos.y > height? height:pos.y);
+      pos = new Point(pos.x > width? width-1 :pos.x, pos.y > height? height-1:pos.y);
     }
   }
 
   public void removeEpsilon() {
-    if (vel.length() < .1) {
+    if (vel.length() < .01) {
       vel = new Vector(0, 0);
     }
   }
