@@ -66,30 +66,31 @@ public class PointMass {
   }
 
 
-  public boolean checkCollision(PointMass p) {
-    boolean touchingV =
-      //if top of other is between top and bottom of this
-      (p.pos.y + p.rad < pos.y + rad) && (p.pos.y + p.rad > pos.y - rad) ||
-      //if bottom of other is between top and bottom of this
-      (p.pos.y - p.rad < pos.y + rad) && (p.pos.y - p.rad > pos.y - rad);
-    boolean touchingH =
-      //if top of other is between top and bottom of this
-      (p.pos.x + p.rad < pos.x + rad) && (p.pos.x + p.rad > pos.x - rad) ||
-      //if bottom of other is between top and bottom of this
-      (p.pos.x - p.rad < pos.x + rad) && (p.pos.x - p.rad > pos.x - rad);
+  //public boolean checkCollision(PointMass p) {
+  //  boolean touchingV =
+  //    //if top of other is between top and bottom of this
+  //    (p.pos.y + p.rad < pos.y + rad) && (p.pos.y + p.rad > pos.y - rad) ||
+  //    //if bottom of other is between top and bottom of this
+  //    (p.pos.y - p.rad < pos.y + rad) && (p.pos.y - p.rad > pos.y - rad);
+  //  boolean touchingH =
+  //    //if top of other is between top and bottom of this
+  //    (p.pos.x + p.rad < pos.x + rad) && (p.pos.x + p.rad > pos.x - rad) ||
+  //    //if bottom of other is between top and bottom of this
+  //    (p.pos.x - p.rad < pos.x + rad) && (p.pos.x - p.rad > pos.x - rad);
 
-    if (!touchingH & touchingV) return false;
+  //  if (!(touchingH && touchingV)) return false;
 
-    Vector v = p.pos.subtract(pos);
-    Vector dirn;
-    if (Math.abs(v.dx) > Math.abs(v.dy)) {
-      dirn = new Vector(v.dx, 0).normalize();
-    }
-    dirn = new Vector(0, v.dy).normalize();
+  //  Vector v = p.pos.subtract(pos);
+  //  Vector dirn;
+  //  if (Math.abs(v.dx) > Math.abs(v.dy)) {
+  //    dirn = new Vector(-v.dx, 0).normalize();
+  //  } else {
+  //    dirn = new Vector(0, -v.dy).normalize();
+  //  }
 
-    collideAt(pos, globalEnergyLoss, dirn);
-    return true;
-  }
+  //  collideAt(pos.add(dirn.scale(rad)), globalEnergyLoss, dirn);
+  //  return true;
+  //}
 
   public boolean mouseInteraction() {
     Point mouse= translate(new Point(mouseX, mouseY));
@@ -135,11 +136,11 @@ public class PointMass {
   }
 
   public void clamp() {
-    if ( pos.x < 0 || pos.y < 0) {
-      pos = new Point(pos.x < 0? 1:pos.x, pos.y < 0? 1:pos.y);
+    if (pos.x < rad || pos.y < rad) {
+      pos = new Point(pos.x < rad? rad-1:pos.x, pos.y < rad? rad-1:pos.y);
     }
-    if (pos.x > width || pos.y > height ) {
-      pos = new Point(pos.x > width? width-1 :pos.x, pos.y > height? height-1:pos.y);
+    if (pos.x > width -rad|| pos.y > height-rad ) {
+      pos = new Point(pos.x > width-rad? width-rad +1:pos.x, pos.y > height-rad? height-rad+1:pos.y);
     }
   }
 
