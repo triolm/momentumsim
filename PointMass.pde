@@ -23,6 +23,9 @@ public class PointMass {
     pos = pos.add(vel);
 
     walls();
+    
+    
+    //if(pos.x > width - rad) print(pos.x);
   }
 
 
@@ -32,7 +35,12 @@ public class PointMass {
     checkCollision(new Point(pos.x, height), 3 *Math.PI/2);
     checkCollision(new Point(pos.x, 0), Math.PI/2)    ;
     checkCollision(new Point(width, pos.y), Math.PI);
-    checkCollision(new Point(0, pos.y), 0);
+    checkCollision(new Point(0, pos.y), 0); 
+    
+    
+    checkCollision(new Point(pos.x, pos.x - (width - 200)),  3 *Math.PI/4);
+    
+    clampNoTouch();
   }
 
   public void collideAt(Point p, double energyLoss, double normalAngle) {
@@ -143,6 +151,17 @@ public class PointMass {
       pos = new Point(pos.x > width-rad? width-rad +1:pos.x, pos.y > height-rad? height-rad+1:pos.y);
     }
   }
+  
+   public void clampNoTouch() {
+    if (pos.x < rad || pos.y < rad) {
+      pos = new Point(pos.x < rad? rad+1:pos.x, pos.y < rad? rad+1:pos.y);
+    }
+    if (pos.x > width -rad|| pos.y > height-rad ) {
+      pos = new Point(
+      pos.x >= width-rad? width-rad - 1 :pos.x, 
+      pos.y >= height-rad? height-rad - 1 :pos.y);
+    }
+  }
 
   public void removeEpsilon() {
     if (vel.length() < .01) {
@@ -154,6 +173,16 @@ public class PointMass {
     rectMode(CENTER);
     fill(0, 0, 0);
     Point t = translate(pos);
-    rect((float)t.x, (float)t.y, 2f*(float)rad, 2f*(float)rad);
+    circle((float)t.x, (float)t.y, 2f*(float)rad);
+
+    obstacle();
+  }
+
+
+
+  public void obstacle() {
+    fill(0, 0, 0);
+    int leglen = 200;
+    triangle(width - leglen, height, width, height, width, height - leglen);
   }
 }
